@@ -13,6 +13,7 @@ fi
 sudo apt-get update
 sudo apt install -y python
 sudo apt-get install -y python-pip
+pip install --upgrade pip
 sudo -H pip install python-openstackclient
 sudo -H pip install netaddr
 sudo -H pip install ansible
@@ -22,6 +23,7 @@ sudo apt install unzip
 wget https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip
 unzip terraform_0.11.7_linux_amd64.zip
 sudo mv terraform /bin
+rm terraform_0.11.7_linux_amd64.zip
 
 # Java
 sudo echo PURGE | sudo debconf-communicate oracle-java8-installer
