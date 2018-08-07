@@ -10,7 +10,7 @@ image = "xenial-isg-docker-c52f7acc02b0c11d41b174707e4c271b16f52996"
 ssh_user = "ubuntu"
 
 # 0|1 bastion nodes
-number_of_bastions = 1
+number_of_bastions = 0
 flavor_bastion = "8002"
 
 # standalone etcds
