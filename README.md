@@ -62,6 +62,11 @@ export OS_PASSWORD=YOUR_OPENSTACK_PASSWORD
 
 Additionally, you can put the sourcing of the OpenStack RC File into your `.bashrc` (on this machine) so you never need to think about it again.
 
+add this to your .bashrc:
+```
+export OS_CLOUD=openstack
+```
+
 * Run the following commands which will install all the prerequisites for `kubespray`, additionally the Nextflow workflow engine (and Java, which it depends on) and `kubectl` client:
 
 ```

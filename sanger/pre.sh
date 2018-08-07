@@ -12,7 +12,7 @@ fi
 # Python and Ansible
 sudo apt-get update
 sudo apt install -y python
-sudo apt-get install -y python-pip
+sudo apt install -y python-pip
 sudo -H pip install --upgrade pip
 sudo -H pip install python-openstackclient
 sudo -H pip install netaddr
