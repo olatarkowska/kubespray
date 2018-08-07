@@ -13,7 +13,7 @@ fi
 sudo apt-get update
 sudo apt install -y python
 sudo apt-get install -y python-pip
-pip install --upgrade pip
+sudo -H pip install --upgrade pip
 sudo -H pip install python-openstackclient
 sudo -H pip install netaddr
 sudo -H pip install ansible
