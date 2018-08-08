@@ -41,5 +41,6 @@ flavor_gfs_node = "8002"
 # networking
 network_name = "my-k8s-network"
 external_net = "bfd77d25-d230-436a-a85a-b28b3dbdb814"
+dns_nameservers=["172.18.255.1"]
 floatingip_pool = "public"
 
