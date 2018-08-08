@@ -182,22 +182,9 @@ sanger/terr.sh
 
 ### Ansible
 
-    # Install dependencies from ``requirements.txt``
-    sudo -H pip install -r requirements.txt
-
-    # Copy ``inventory/sample`` as ``inventory/mycluster``
-    cp -rfp inventory/sample inventory/mycluster
-
-    # Update Ansible inventory file with inventory builder
-    declare -a IPS=(10.10.1.3 10.10.1.4 10.10.1.5)
-    CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
-
-    # Review and change parameters under ``inventory/mycluster/group_vars``
-    cat inventory/mycluster/group_vars/all.yml
-    cat inventory/mycluster/group_vars/k8s-cluster.yml
-
-    # Deploy Kubespray with Ansible Playbook
-    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml
+```
+neutron port-list -c id -c device_id  | grep -E $(nova list | grep my-k8s-cluster | awk '{print $2}' | xargs echo | tr ' ' '|') | awk '{print $2}' | xargs -n 1 -I XXX echo neutron port-update XXX --allowed_address_pairs list=true type=dict ip_address=10.233.0.0/18 ip_address=10.233.64.0/18 | bash -eEx
+```
 
 ### Vagrant
 
