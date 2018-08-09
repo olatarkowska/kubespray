@@ -13,7 +13,7 @@ If you already have an OpenStack account and forgot your password you can find i
 
 To setup a Kubernetes cluster we will use Terraform and Ansible. Terraform creates instances in OpenStack, along with networks and volumes and all the other fiddly bits required for the Kubernetes cluster. Ansible provisions all the necessary software to those instances.
 
-Both Terraform and Ansible are run from a controller instance which has to be created first.
+Both Terraform and Ansible are run from a _deployment machine_ (see below).
 
 All of the software have been nicely packaged into [kubespray](https://github.com/kubernetes-incubator/kubespray) GitHub repository. Here we are using version 2.5.0 of the kubespray, which was obtained by forking the original repository and resetting the head of the repository to the commit before the release of version 2.5.0:
 ```
@@ -23,30 +23,28 @@ git push -f origin master
 
 All other changes were introduced by us with an enormous help of Helen Cousins (@HelenCousins), Theo Barber-Bany (@theobarberbany), Stijn van Dongen (@micans) and Anton Khodak (@anton-khodak). All of the changes are located in the `sanger` folder of the current repository.
 
-### Setting up a controller instance
+### Deployment machine
 
-_run the following steps from your Sanger laptop or from a Sanger Linux desktop on a wired network_
+* Download the OpenStack RC File (Identity API v3) and OpenStack RC File (Identity API v2) from [Horizon dashboard](https://zeta.internal.sanger.ac.uk) by going to `Project/Api Access`. This is your credentials for accessing the OpenStack command line interface.
 
-* Using OpenStack credentials login to [Horizon dashboard](https://zeta.internal.sanger.ac.uk)/Instances and launch a clean Ubuntu Xenial instance with `o1.medium` flavour and associate a floating IP (e.g. 12.34.56.78) with it. When launching the instance import your public key (`~/.ssh/id_rsa.pub`) for easy ssh-ing. Give your instance a proper name, e.g. `k8s-controller`.
+For deployment please use `farm4-head1` node of the Sanger farm. It already has all of the required cloud command line interfaces installed for you.
 
-* Download your OpenStack RC File (Identity API v3) from [Horizon dashboard](https://zeta.internal.sanger.ac.uk) by going to `Project/Api Access`. This is your credentials for accessing the OpenStack command line interface.
-
-* Copy your OpenStack RC File to your controller instance:
+* Copy your OpenStack RC Files to the farm node:
 
 ```
-scp your-openrc.sh ubuntu@12.34.56.78:~
+scp YOUR_OPENRC_V2.sh YOUR_USER_NAME@farm4-head1:~
+scp YOUR_OPENRC_V3.sh YOUR_USER_NAME@farm4-head1:~
 ```
+Use you Sanger credentials to authenticate.
 
-(your file name and ip address will be different)
-
-* Login to your instance and source your OpenStack RC File:
+* Login to the farm node:
 
 ```
-ssh ubuntu@12.34.56.78
-source your-openrc.sh
+ssh YOUR_USER_NAME@farm4-head1
 ```
+Use you Sanger credentials to authenticate.
 
-When asked provide your OpenStack password (see above). For the future, you can add your password directly to the `your-openrc.sh` file by substituting the following lines:
+* Substitute the following lines in the YOUR_OPENRC_V3.sh file:
 
 ```
 echo "Please enter your OpenStack Password for project $OS_PROJECT_NAME as user $OS_USERNAME: "
@@ -59,20 +57,25 @@ with the just the following line:
 ```
 export OS_PASSWORD=YOUR_OPENSTACK_PASSWORD
 ```
+(please paste the actual password)
 
-Additionally, you can put the sourcing of the OpenStack RC File into your `.bashrc` (on this machine) so you never need to think about it again.
+* Substitute `export OS_PROJECT_ID=...` in the YOUR_OPENRC_V3.sh file with the `export OS_TENANT_ID=...` which you can find in the YOUR_OPENRC_V2.sh file.
 
-add this to your .bashrc:
-```
-export OS_CLOUD=openstack
-```
+* Delete `unset OS_TENANT_ID` from the YOUR_OPENRC_V3.sh file.
 
-* Run the following commands which will install all the prerequisites for `kubespray`, additionally the Nextflow workflow engine (and Java, which it depends on) and `kubectl` client:
+* Put the sourcing of the YOUR_OPENRC_V3.sh into your `.bashrc`.
+
+* Run the following commands which will install all the prerequisites for `kubespray` and enter the `kubspray` directory:
 
 ```
 git clone https://github.com/cellgeni/kubespray.git
 cd kubespray
-sanger/pre.sh
+```
+
+* We have prepared Terraform and Ansible installation for you in a conda environment. To activate the environment please run:
+```
+source /nfs/cellgeni/.cellgenirc
+source activate k8s2.5.0
 ```
 
 ## Terraforming

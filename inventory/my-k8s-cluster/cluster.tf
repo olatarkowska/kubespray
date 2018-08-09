@@ -1,5 +1,5 @@
 # your Kubernetes cluster name here
-cluster_name = "my-k8s-cluster"
+cluster_name = "cellgein"
 
 # SSH key to use for access to nodes
 public_key_path = "~/.ssh/id_rsa.pub"
@@ -17,9 +17,9 @@ flavor_bastion = "8002"
 number_of_etcd = 0
 
 # masters
-number_of_k8s_masters = 1
+number_of_k8s_masters = 0
 number_of_k8s_masters_no_etcd = 0
-number_of_k8s_masters_no_floating_ip = 0
+number_of_k8s_masters_no_floating_ip = 2
 number_of_k8s_masters_no_floating_ip_no_etcd = 0
 flavor_k8s_master = "8002"
 
