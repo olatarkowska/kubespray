@@ -30,7 +30,7 @@ flavor_k8s_node = "2006"
 
 # GlusterFS
 # either 0 or more than one
-number_of_gfs_nodes_no_floating_ip = 3
+number_of_gfs_nodes_no_floating_ip = 1
 gfs_volume_size_in_gb = 35000
 # Container Linux does not support GlusterFS
 image_gfs = "xenial-isg-docker-c52f7acc02b0c11d41b174707e4c271b16f52996"

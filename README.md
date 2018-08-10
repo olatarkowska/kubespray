@@ -21,7 +21,7 @@ git reset --hard 02cd541
 git push -f origin master
 ```
 
-All other changes were introduced by us with an enormous help of Helen Cousins (@HelenCousins), Theo Barber-Bany (@theobarberbany), Stijn van Dongen (@micans) and Anton Khodak (@anton-khodak). All of the changes are located in the `sanger` folder of the current repository.
+All other changes were introduced by us with an enormous help of Helen Cousins (@HelenCousins), Theo Barber-Bany (@theobarberbany), Stijn van Dongen (@micans) and Anton Khodak (@anton-khodak). 
 
 ### Deployment machine
 
@@ -65,6 +65,12 @@ export OS_PASSWORD=YOUR_OPENSTACK_PASSWORD
 
 * Put the sourcing of the YOUR_OPENRC_V3.sh into your `.bashrc`.
 
+* If you don't have an ssh key in your `~/.ssh` folder you will need to generate one and add it to your ssh agent:
+```
+ssh-keygen -t rsa
+```
+(follow the instructions)
+
 * Run the following commands which will install all the prerequisites for `kubespray` and enter the `kubspray` directory:
 
 ```
@@ -80,7 +86,21 @@ source activate k8s2.5.0
 
 ## Terraforming
 
-Terraform creates infrastructure from a simple text configuration file. [my-terraform-vars.tfvars](sanger/my-terraform-vars.tfvars) is an example of such a Terraform configuration file.
+Terraform creates infrastructure from a simple text configuration file. Follow this instructions on the terraform configuration file/variables: https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#cluster-variables
+
+We have preconfigured our development/staging/production clusters, they are in `inventory/$ENVIRONMENT` folders.
+
+You can either reuse our settings or create your own folder in the `invetory` folder with your own cluster settings.
+
+The next step is to create you cloud infrastructure for kubernetes using Terraform. Follow this instructions for terraforming: https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#initialization
+
+Note that there was a pull request created by us which was not merged to the 2.5.0 release of the kubespray (https://github.com/kubernetes-incubator/kubespray/pull/2681). Therefore we incorporated these changes manually in this repository.
+
+
+```
+cd inventory/production
+terraform init ../../contrib/terraform/openstack
+```
 
 ### Sanger-specific variables
 Most of the variables in this file can be adjusted for your own needs. However, there are a few of them which represent Sanger OpenStack settings:
