@@ -96,12 +96,6 @@ The next step is to create you cloud infrastructure for kubernetes using Terrafo
 
 Note that there was a pull request created by us which was not merged to the 2.5.0 release of the kubespray (https://github.com/kubernetes-incubator/kubespray/pull/2681). Therefore we incorporated these changes manually in this repository.
 
-
-```
-cd inventory/production
-terraform init ../../contrib/terraform/openstack
-```
-
 ### Sanger-specific variables
 Most of the variables in this file can be adjusted for your own needs. However, there are a few of them which represent Sanger OpenStack settings:
 ```
@@ -205,54 +199,57 @@ sanger/terr.sh
 
 ### Ansible
 
+To run Ansible please follow these instructions: https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#ansible
+
+Before running Ansible, make sure to update the `openstack_lbaas_subnet_id` variable in `group_vars/all.yml` the with the `network_id` parameter created by terraform:
 ```
-neutron port-list -c id -c device_id  | grep -E $(nova list | grep my-k8s-cluster | awk '{print $2}' | xargs echo | tr ' ' '|') | awk '{print $2}' | xargs -n 1 -I XXX echo neutron port-update XXX --allowed_address_pairs list=true type=dict ip_address=10.233.0.0/18 ip_address=10.233.64.0/18 | bash -eEx
+terraform show terraform.tfstate | grep ' network_id'
 ```
 
-### Vagrant
+Also when you get to the `configuring OpenStack Neutron ports for __calico__` section please follow Theo's instructions on that and run the following one line (thanks to David Jackson!) substituting the $CLUSTER_NAME with your own cluster names defined in the terraform configuration file:
+```
+neutron port-list -c id -c device_id  | grep -E $(nova list | grep $CLUSTER_NAME | awk '{print $2}' | xargs echo | tr ' ' '|') | awk '{print $2}' | xargs -n 1 -I XXX echo neutron port-update XXX --allowed_address_pairs list=true type=dict ip_address=10.233.0.0/18 ip_address=10.233.64.0/18 | bash -eEx
+```
 
-For Vagrant we need to install python dependencies for provisioning tasks.
-Check if Python and pip are installed:
+Now go back to the root `kubespray` directory and run ansible following these instructions: https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#deploy-kubernetes
 
-    python -V && pip -V
+At this step we found a bug for which we created a pull request (https://github.com/kubernetes-incubator/kubespray/pull/3079), but it was not added to the 2.5.0 release of kubespray, therefore we added it manually to this repository
 
-If this returns the version of the software, you're good to go. If not, download and install Python from here <https://www.python.org/downloads/source/>
-Install the necessary requirements
+▶ vi ~/.ssh/cellgeni-su-farm4
 
-    sudo pip install -r requirements.txt
-    vagrant up
+~/production
+▶ chmod 600 ~/.ssh/cellgeni-su-farm4
 
-Documents
----------
+```
+Host 10.0.0.*
+       ProxyCommand ssh -W %h:%p bastion
+       User ubuntu
+       IdentityFile ~/.ssh/cellgeni-su-farm4
+       ForwardX11 yes
+       ForwardAgent yes
+       ForwardX11Trusted yes
+Host bastion
+       Hostname BASTION_IP
+       User ubuntu
+       IdentityFile ~/.ssh/cellgeni-su-farm4
+       ControlMaster auto
+       ControlPath ~/.ssh/ansible-%r@%h:%p
+       ForwardX11 yes
+       ForwardAgent yes
+       ForwardX11Trusted yes
+Host master
+       Hostname MASTER_IP
+       IdentityFile ~/.ssh/cellgeni-su-farm4
+       ProxyCommand ssh -W %h:%p bastion
+       User ubuntu
+```
 
--   [Requirements](#requirements)
--   [Kubespray vs ...](docs/comparisons.md)
--   [Getting started](docs/getting-started.md)
--   [Ansible inventory and tags](docs/ansible.md)
--   [Integration with existing ansible repo](docs/integration.md)
--   [Deployment data variables](docs/vars.md)
--   [DNS stack](docs/dns-stack.md)
--   [HA mode](docs/ha-mode.md)
--   [Network plugins](#network-plugins)
--   [Vagrant install](docs/vagrant.md)
--   [CoreOS bootstrap](docs/coreos.md)
--   [Debian Jessie setup](docs/debian.md)
--   [openSUSE setup](docs/opensuse.md)
--   [Downloaded artifacts](docs/downloads.md)
--   [Cloud providers](docs/cloud.md)
--   [OpenStack](docs/openstack.md)
--   [AWS](docs/aws.md)
--   [Azure](docs/azure.md)
--   [vSphere](docs/vsphere.md)
--   [Large deployments](docs/large-deployments.md)
--   [Upgrades basics](docs/upgrades.md)
--   [Roadmap](docs/roadmap.md)
+Follow the kubectl instructions: https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#set-up-kubectl
 
+```
+▶ ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -l ubuntu -Nf -L 
+```
 
-Community docs and resources
-----------------------------
-
--   [kubernetes.io/docs/getting-started-guides/kubespray/](https://kubernetes.io/docs/getting-started-guides/kubespray/)
--   [kubespray, monitoring and logging](https://github.com/gregbkr/kubernetes-kargo-logging-monitoring) by @gregbkr
--   [Deploy Kubernetes w/ Ansible & Terraform](https://rsmitty.github.io/Terraform-Ansible-Kubernetes/) by @rsmitty
--   [Deploy a Kubernetes Cluster with Kubespray (video)](https://www.youtube.com/watch?v=N9q51JgbWu8)
+```
+▶ lsof -ti:16443 | xargs kill -9
+```
