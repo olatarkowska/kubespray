@@ -23,7 +23,7 @@ git push -f origin master
 
 All other changes were introduced by us with an enormous help of Helen Cousins (@HelenCousins), Theo Barber-Bany (@theobarberbany), Stijn van Dongen (@micans) and Anton Khodak (@anton-khodak). 
 
-### Deployment machine
+## Deployment machine
 
 * Download the OpenStack RC File (Identity API v3) and OpenStack RC File (Identity API v2) from [Horizon dashboard](https://zeta.internal.sanger.ac.uk) by going to `Project/Api Access`. This is your credentials for accessing the OpenStack command line interface.
 
@@ -273,7 +273,7 @@ ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -l ubuntu -Nf -L 16443:MAS
 ```
 
 
-### GlusterFS hostpath provision
+## GlusterFS hostpath provision
 
 To check ansible hosts:
 ```
@@ -297,14 +297,43 @@ When the groups are known Ansible allows to provision only to hosts correspondin
 
 In our case we would like to mount gluster volume to the kube-node group.
 
+Create directories using module `file`:
 ```
-ansible kube-node -i inventory/production/hosts -a "sudo mkdir -p /etc/glusterfs"
+ansible kube-node -b -i inventory/production/hosts -m file -a "path=/mnt/gluster state=directory"
+ansible kube-node -b -i inventory/production/hosts -m file -a "path=/etc/glusterfs state=directory"
+```
 
-ansible kube-node -i inventory/production/hosts -m copy -a "src=/sanger/glusterfs-config dest=/etc/glusterfs/"
+Copy gluster-config using moduel `copy`:
+```
+ansible kube-node -b -i inventory/production/hosts -m copy -a "src=sanger/glusterfs-config dest=/etc/glusterfs/"
+```
 
-ansible kube-node -i inventory/production/hosts -a "sudo mkdir -p /mnt/gluster && echo \"/etc/glusterfs/gluster-config /mnt/gluster glusterfs rw 0 0\" | sudo tee -a /etc/fstab && sudo mount -a"
+Add glusterfs line to `/etc/fstab`:
+```
+ansible kube-node -b -i inventory/production/hosts -m lineinfile -a 'dest=/etc/fstab line="/etc/glusterfs/glusterfs-config /mnt/gluster glusterfs rw 0 0"'
+```
 
-# this is required for iRods to work
-ansible kube-node -i inventory/production/hosts -a "echo search internal.sanger.ac.uk >> a && sudo mv a  /etc/resolvconf/resolv.conf.d/base && sudo resolvconf -u"
+Finally, mount glusterfs:
+```
+ansible kube-node -b -i inventory/production/hosts -a "mount -a"
+```
+
+## iRods
+
+This is needed for iRods to work
+```
+ansible kube-node -b -i inventory/production/hosts -a "echo search internal.sanger.ac.uk >> a && mv a  /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
+```
+
+We also need to create a cluster secret which can be used by iRods. In the [irods-secret.yml](sanger/irods-secret.yml) substitute the `IPW` and `IUN` with your username and password in base64 encoding. To encode please use:
 
 ```
+echo -n IRODS_USER_NAME | base64
+```
+
+To create a secret:
+```
+kubectl create -f sanger/irods-secret.yml
+```
+
+After that you can start using our iRods image (`quay.io/cellgeni/irods`) without needing to provide your credentials.
