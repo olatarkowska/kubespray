@@ -337,3 +337,11 @@ kubectl create -f sanger/irods-secret.yml
 ```
 
 After that you can start using our iRods image (`quay.io/cellgeni/irods`) without needing to provide your credentials.
+
+## Nextflow
+
+To be able to run Nextflow on Kubernetes we need to create a persistent volume claim (we provide a template in this repo):
+
+```
+kubectl create -f sanger/NF-pvc.yml
+```
