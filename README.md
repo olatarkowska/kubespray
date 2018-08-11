@@ -215,10 +215,8 @@ Now go back to the root `kubespray` directory and run ansible following these in
 
 At this step we found a bug for which we created a pull request (https://github.com/kubernetes-incubator/kubespray/pull/3079), but it was not added to the 2.5.0 release of kubespray, therefore we added it manually to this repository
 
-▶ vi ~/.ssh/cellgeni-su-farm4
-
-~/production
-▶ chmod 600 ~/.ssh/cellgeni-su-farm4
+~/.ssh/cellgeni-su-farm4
+chmod 600 ~/.ssh/cellgeni-su-farm4
 
 ```
 Host 10.0.0.*
@@ -232,24 +230,81 @@ Host bastion
        Hostname BASTION_IP
        User ubuntu
        IdentityFile ~/.ssh/cellgeni-su-farm4
-       ControlMaster auto
-       ControlPath ~/.ssh/ansible-%r@%h:%p
        ForwardX11 yes
        ForwardAgent yes
        ForwardX11Trusted yes
 Host master
-       Hostname MASTER_IP
+       Hostname MASTER_INTERNAL_IP
        IdentityFile ~/.ssh/cellgeni-su-farm4
        ProxyCommand ssh -W %h:%p bastion
        User ubuntu
 ```
 
+```
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: /Users/vk6/production/ca.pem
+    server: https://127.0.0.1:16443
+  name: default-cluster
+contexts:
+- context:
+    cluster: default-cluster
+    user: default-admin
+  name: default-system
+current-context: default-system
+kind: Config
+preferences: {}
+users:
+- name: default-admin
+  user:
+    client-certificate: /Users/vk6/production/admin.pem
+    client-key: /Users/vk6/production/admin-key.pem
+```
+
 Follow the kubectl instructions: https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#set-up-kubectl
 
 ```
-▶ ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -l ubuntu -Nf -L 
+ssh -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -l ubuntu -Nf -L 16443:MASTER_INTERNAL_IP:6443 BASTION_IP
 ```
 
 ```
 ▶ lsof -ti:16443 | xargs kill -9
+```
+
+
+### GlusterFS hostpath provision
+
+To check ansible hosts:
+```
+inventory/production/hosts --hostfile
+```
+
+To find to which ansible group the host belongs to (search for `kubespray_groups` section):
+```
+inventory/production/hosts --host production-k8s-master-nf-3
+inventory/production/hosts --hostproduction-k8s-node-nf-2
+```
+
+The script above provides us with a list of ansible groups:
+
+* kube-master
+* kube-node
+* gfs-cluster
+* bastion
+
+When the groups are known Ansible allows to provision only to hosts corresponding to a specific group.
+
+In our case we would like to mount gluster volume to the kube-node group.
+
+```
+ansible kube-node -i inventory/production/hosts -a "sudo mkdir -p /etc/glusterfs"
+
+ansible kube-node -i inventory/production/hosts -m copy -a "src=/sanger/glusterfs-config dest=/etc/glusterfs/"
+
+ansible kube-node -i inventory/production/hosts -a "sudo mkdir -p /mnt/gluster && echo \"/etc/glusterfs/gluster-config /mnt/gluster glusterfs rw 0 0\" | sudo tee -a /etc/fstab && sudo mount -a"
+
+# this is required for iRods to work
+ansible kube-node -i inventory/production/hosts -a "echo search internal.sanger.ac.uk >> a && sudo mv a  /etc/resolvconf/resolv.conf.d/base && sudo resolvconf -u"
+
 ```
