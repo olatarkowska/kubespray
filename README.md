@@ -240,7 +240,7 @@ In our case we would like to mount GlusterFS volume to the `kube-node` group.
 ansible kube-node -b -i inventory/production/hosts -m file -a "path=/mnt/gluster state=directory"
 ansible kube-node -b -i inventory/production/hosts -m file -a "path=/etc/glusterfs state=directory"
 
-# Copy gluster-config using moduel `copy`:
+# Copy gluster-config using module `copy`:
 ansible kube-node -b -i inventory/production/hosts -m copy -a "src=sanger/glusterfs-config dest=/etc/glusterfs/"
 
 # Add glusterfs line to `/etc/fstab`:
@@ -250,7 +250,8 @@ ansible kube-node -b -i inventory/production/hosts -m lineinfile -a 'dest=/etc/f
 ansible kube-node -b -i inventory/production/hosts -a "mount -a"
 
 # This is needed for iRods to work
-ansible kube-node -b -i inventory/production/hosts -a "echo search internal.sanger.ac.uk >> a && mv a  /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
+# `-m shell` is used to escape redirection in the script
+ansible kube-node -b -i inventory/production/hosts -m shell -a "echo search internal.sanger.ac.uk > /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
 ```
 
 ## iRods
