@@ -6,8 +6,6 @@ auth:
       - ak27
       - vk6
       - svd
-
-auth:
   type: ldap
   ldap:
     server:
@@ -16,24 +14,22 @@ auth:
       templates:
         - 'uid={username},ou=people,dc=sanger,dc=ac,dc=uk'
 ingress:
-    enabled: true
+    enabled: false
     hosts:
      - jupyter.cellgeni.sanger.ac.uk
      - jupyter.cellgeni.internal.sanger.ac.uk
 
 singleuser:
   memory:
-    limit: 8G
-    guarantee: 1G
+    limit: 16G
+    guarantee: 8G
   cpu:
-    limit: 8
-    guarantee: .5
+    limit: 4
+    guarantee: 2
   image:
-    # name: quay.io/cellgeni/cellgeni-jupyter
-    name: jupyter/scipy-notebook
-    # tag: v0.1
-    tag: 8ccdfc1da8d5
-  # lifecycleHooks:
-  #   postStart:
-  #     exec:
-  #       command: ["cp", "-a", "files/*", "."]
+    name: quay.io/cellgeni/cellgeni-jupyter
+    tag: v0.1.2
+  lifecycleHooks:
+    postStart:
+      exec:
+        command: ["cp", "-R", "/files/", "."]
