@@ -28,8 +28,8 @@ singleuser:
     guarantee: 2
   image:
     name: quay.io/cellgeni/cellgeni-jupyter
-    tag: v0.1.2
+    tag: latest
   lifecycleHooks:
     postStart:
       exec:
-        command: ["cp", "-R", "/files/", "."]
+        command: ["bash", "/poststart.sh"]
