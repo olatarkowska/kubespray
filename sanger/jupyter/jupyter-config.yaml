@@ -20,6 +20,7 @@ ingress:
      - jupyter.cellgeni.internal.sanger.ac.uk
 
 singleuser:
+  defaultUrl: "/lab"
   memory:
     limit: 16G
     guarantee: 8G
