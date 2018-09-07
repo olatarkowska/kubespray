@@ -29,7 +29,7 @@ singleuser:
     guarantee: 2
   image:
     name: quay.io/cellgeni/cellgeni-jupyter
-    tag: latest
+    tag: v0.2.2
   lifecycleHooks:
     postStart:
       exec:

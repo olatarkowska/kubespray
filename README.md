@@ -113,7 +113,7 @@ openstack flavor list
 
 Kubespray uses [GlusterFS](https://docs.gluster.org/en/latest/) to create a shared volume between the Kubernetes nodes. GlusterFS is a scalable network filesystem suitable for data-intensive tasks such as cloud storage and media streaming. GlusterFS is free and open source software and can utilize common off-the-shelf hardware.
 
-We have pre-configured our development/staging/production clusters, they are located in the `inventory` folders. You can either reuse our settings or create your own folder in the `invetory` folder with your own cluster settings.
+We have pre-configured our development and production clusters, they are located in the `inventory` folders. You can either reuse our settings or create your own folder in the `invetory` folder with your own cluster settings by following [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#inventory-files).
 
 ### Run Terraform
 
@@ -123,19 +123,37 @@ Note that Theo created [a pull request](https://github.com/kubernetes-incubator/
 
 ## Ansible
 
-To run Ansible please follow [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#ansible)
+### Network pre-settings
 
 Before running Ansible, make sure to update the `openstack_lbaas_subnet_id` variable in `inventory/CLUSTER/group_vars/all.yml` the with the `network_id` parameter created by terraform:
 ```
 terraform show terraform.tfstate | grep ' network_id'
 ```
 
-Also when you get to the `configuring OpenStack Neutron ports` for __calico networking__ section please follow [Theo's instructions](https://github.com/theobarberbany/Kubernetes_on_Openstack/tree/master/kubespray) on that and run the following one line (thanks to David Jackson!) substituting the `CLUSTER` with your own cluster names defined in the terraform configuration file:
+Also, when you get to the `configuring OpenStack Neutron ports` for __calico networking__ section please follow [Theo's instructions](https://github.com/theobarberbany/Kubernetes_on_Openstack/tree/master/kubespray) on that and run the following one line (thanks to David Jackson!) substituting the `CLUSTER` with your own cluster names defined in the terraform configuration file:
 ```
 neutron port-list -c id -c device_id  | grep -E $(nova list | grep CLUSTER | awk '{print $2}' | xargs echo | tr ' ' '|') | awk '{print $2}' | xargs -n 1 -I XXX echo neutron port-update XXX --allowed_address_pairs list=true type=dict ip_address=10.233.0.0/18 ip_address=10.233.64.0/18 | bash -eEx
 ```
 
-Now go back to the root `kubespray` directory and run ansible following [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#deploy-kubernetes)
+### TERRAFORM_STATE_ROOT variable
+
+**Important!** Before running the Ansible playbooks make sure you set the `TERRAFORM_STATE_ROOT` to the path of your cluster inventory folder, e.g. from the root `kubespray` folder run:
+```
+export TERRAFORM_STATE_ROOT=$(pwd)/inventory/$CLUSTER
+```
+In this case you can deploy multiple clusters from the same kubespray folder. `TERRAFORM_STATE_ROOT` will tell Ansible only to use hosts of your `$CLUSTER` from the terraform state file of the `inventory/$CLUSTER` folder only. If you don't do that Ansible may start updating all of you clusters.
+
+### Run Ansible
+
+From the root `kubespray` directory run ansible following [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#deploy-kubernetes)
+
+### Glusterfs provision
+
+Now when kubernetes is installed we need to setup glusterfs volumes. From the root `kubespray` directory run:
+
+```
+ansible-playbook --become -i inventory/$CLUSTER/hosts contrib/network-storage/glusterfs/glusterfs.yml
+```
 
 At this step we found a bug which we created [a pull request](https://github.com/kubernetes-incubator/kubespray/pull/3079) for, but it was not added to the 2.5.0 release of kubespray, therefore we added it manually to this repository.
 
@@ -221,7 +239,7 @@ inventory/production/hosts --hostfile
 To find to which ansible group the host belongs to (search for `kubespray_groups` section):
 ```
 inventory/production/hosts --host production-k8s-master-nf-3
-inventory/production/hosts --hostproduction-k8s-node-nf-2
+inventory/production/hosts --host production-k8s-node-nf-2
 ```
 
 The script above provides us with a list of ansible groups:
