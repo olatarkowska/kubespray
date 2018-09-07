@@ -294,3 +294,60 @@ To be able to run Nextflow on Kubernetes we need to create a persistent volume c
 ```
 kubectl create -f sanger/NF-pvc.yml
 ```
+
+## JupyterHub
+
+Once you have a Kubernetes cluster running it is very easy to deploy a JupyterHup server on it. We followed [these amazing instructions](https://zero-to-jupyterhub.readthedocs.io/en/stable/) and used the [Helm](https://helm.sh/) package manager which provides a ready to use Kubernetes version of JupyterHub.
+
+Helm works the same way as `kubectl`, you install it on your local machine and interact with the cluster from it.
+
+### Helm version
+
+When installing Helm make sure you have the same versions on the Kubernetes cluster and on you local machine. You can download a specific version of helm directly from their GitHub:
+
+```
+tar -zxvf helm-v2.9.1-darwin-amd64.tar.gz
+mv darwin-amd64/helm /usr/local/bin/helm
+```
+
+### Helm initialization
+
+If helm is not installed on the cluster you can do 
+```
+helm init
+``` 
+on your local machine and this will install the same version of helm on the cluster. If someone has already installed helm on the cluster, then run 
+```
+helm init --client-only
+```
+
+### JupyterHub repository
+
+Add `jupyterhub` repository to your helm:
+```
+helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/
+helm repo update
+```
+
+### Start/upgrade JupyterHub on Kubernetes
+
+To start a JupyterHub pod in the `jpt` name space for the first time run:
+```
+helm upgrade --install jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0-beta.2 --values jupyter-config.yaml
+```
+
+Here the [jupyter-config.yaml](sanger/jupyter/jupyter-config.yaml) is used in which all of the Jupyter parameters are spefified.
+
+If you update some parameters in the [jupyter-config.yaml](sanger/jupyter/jupyter-config.yaml), you will need to upgrade your JupyterHub deployment:
+```
+helm upgrade jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0-beta.2 --values jupyter-config.yaml
+```
+
+### Tearing down JupyterHub
+
+To tear down the hub, please run:
+
+```
+helm delete jpt --purge
+kubectl delete namespace jpt
+```
