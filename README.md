@@ -351,3 +351,7 @@ To tear down the hub, please run:
 helm delete jpt --purge
 kubectl delete namespace jpt
 ```
+
+### Jupyter notebook on a single instance
+
+If you want to install Jupyter on a single instance please follow [these instructions](sanger/jupyter/single-instance.md)
