@@ -176,6 +176,55 @@ At this step we found a bug which we created [a pull request](https://github.com
 
 After running all of the above with no errors you should have you Kubernetes cluster working and ready to be used. Congratulations!
 
+## GlusterFS hostpath provision
+
+In this step we will mount GlusterFS to all of the cluster working nodes. We will use Ansible for that and run it only for the working nodes group of hosts. To find all Ansible hosts:
+```
+inventory/$CLUSTER/hosts --hostfile
+```
+
+To find to which ansible group the host belongs to (search for `kubespray_groups` section):
+```
+inventory/$CLUSTER/hosts --host $CLUSTER-k8s-master-nf-3
+inventory/$CLUSTER/hosts --host $CLUSTER-k8s-node-nf-2
+```
+
+The script above provides us with a list of ansible groups:
+
+* kube-master
+* kube-node
+* gfs-cluster
+* bastion
+
+When the groups are known Ansible allows to provision only to hosts corresponding to a specific group.
+
+In our case we would like to mount GlusterFS volume to the `kube-node` group.
+
+### Glusterfs config files
+
+Before mounting glusterfs we need to tell ansible IP addresses of the glusterfs nodes. We do this via [glusterfs-config file](sanger/glusterfs-config). Substitute both `REMOTE-HOST-1` and `REMOTE-HOST-2` in that with the IP addressed of the glusterfs nodes. You can use the `inventory/$CLUSTER/hosts --hostfile` command above to find the IP addresses.
+
+### Run ansible
+
+```
+# Create directories using module `file`:
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m file -a "path=/mnt/gluster state=directory"
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m file -a "path=/etc/glusterfs state=directory"
+
+# Copy gluster-config using module `copy`:
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m copy -a "src=sanger/glusterfs-config dest=/etc/glusterfs/"
+
+# Add glusterfs line to `/etc/fstab`:
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m lineinfile -a 'dest=/etc/fstab line="/etc/glusterfs/glusterfs-config /mnt/gluster glusterfs rw 0 0"'
+
+# Finally, mount glusterfs:
+ansible kube-node -b -i inventory/$CLUSTER/hosts -a "mount -a"
+
+# This is needed for iRods to work
+# `-m shell` is used to escape redirection in the script
+ansible kube-node -b -i inventory/production/hosts -m shell -a "echo search internal.sanger.ac.uk > /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
+```
+
 ## kubectl
 
 To access your cluster please look at [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#set-up-kubectl) on how to setup `kubectl`, a command line interface for Kubernetes. We recommend that you set it up on you local computer (not on the `farm4-head1` node). Then you will be able to access the cluster from your computer directly. Here are some important steps for `kubectl` setup on your computer:
@@ -244,49 +293,6 @@ Could not request local forwarding.
 run this command first:
 ```
 lsof -ti:16443 | xargs kill -9
-```
-
-## GlusterFS hostpath provision
-
-In this step we will mount GlusterFS to all of the cluster working nodes. We will use Ansible for that and run it only for the working nodes group of hosts. To find all Ansible hosts:
-```
-inventory/$CLUSTER/hosts --hostfile
-```
-
-To find to which ansible group the host belongs to (search for `kubespray_groups` section):
-```
-inventory/$CLUSTER/hosts --host $CLUSTER-k8s-master-nf-3
-inventory/$CLUSTER/hosts --host $CLUSTER-k8s-node-nf-2
-```
-
-The script above provides us with a list of ansible groups:
-
-* kube-master
-* kube-node
-* gfs-cluster
-* bastion
-
-When the groups are known Ansible allows to provision only to hosts corresponding to a specific group.
-
-In our case we would like to mount GlusterFS volume to the `kube-node` group.
-
-```
-# Create directories using module `file`:
-ansible kube-node -b -i inventory/$CLUSTER/hosts -m file -a "path=/mnt/gluster state=directory"
-ansible kube-node -b -i inventory/$CLUSTER/hosts -m file -a "path=/etc/glusterfs state=directory"
-
-# Copy gluster-config using module `copy`:
-ansible kube-node -b -i inventory/$CLUSTER/hosts -m copy -a "src=sanger/glusterfs-config dest=/etc/glusterfs/"
-
-# Add glusterfs line to `/etc/fstab`:
-ansible kube-node -b -i inventory/$CLUSTER/hosts -m lineinfile -a 'dest=/etc/fstab line="/etc/glusterfs/glusterfs-config /mnt/gluster glusterfs rw 0 0"'
-
-# Finally, mount glusterfs:
-ansible kube-node -b -i inventory/$CLUSTER/hosts -a "mount -a"
-
-# This is needed for iRods to work
-# `-m shell` is used to escape redirection in the script
-ansible kube-node -b -i inventory/production/hosts -m shell -a "echo search internal.sanger.ac.uk > /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
 ```
 
 ## iRods
