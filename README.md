@@ -149,7 +149,7 @@ terraform show terraform.tfstate | grep ' network_id'
 
 Also, when you get to the `configuring OpenStack Neutron ports` for __calico networking__ section please follow [Theo's instructions](https://github.com/theobarberbany/Kubernetes_on_Openstack/tree/master/kubespray) on that and run the following one line (thanks to David Jackson!) substituting the `CLUSTER` with your own cluster names defined in the terraform configuration file:
 ```
-neutron port-list -c id -c device_id  | grep -E $(nova list | grep CLUSTER | awk '{print $2}' | xargs echo | tr ' ' '|') | awk '{print $2}' | xargs -n 1 -I XXX echo neutron port-update XXX --allowed_address_pairs list=true type=dict ip_address=10.233.0.0/18 ip_address=10.233.64.0/18 | bash -eEx
+neutron port-list -c id -c device_id  | grep -E $(nova list | grep $CLUSTER | awk '{print $2}' | xargs echo | tr ' ' '|') | awk '{print $2}' | xargs -n 1 -I XXX echo neutron port-update XXX --allowed_address_pairs list=true type=dict ip_address=10.233.0.0/18 ip_address=10.233.64.0/18 | bash -eEx
 ```
 
 ### TERRAFORM_STATE_ROOT variable
@@ -162,7 +162,7 @@ In this case you can deploy multiple clusters from the same kubespray folder. `T
 
 ### Run Ansible
 
-From the root `kubespray` directory run ansible following [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#deploy-kubernetes)
+From the root `kubespray` directory run ansible following [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#ansible)
 
 ### Glusterfs provision
 
@@ -222,7 +222,7 @@ ansible kube-node -b -i inventory/$CLUSTER/hosts -a "mount -a"
 
 # This is needed for iRods to work
 # `-m shell` is used to escape redirection in the script
-ansible kube-node -b -i inventory/production/hosts -m shell -a "echo search internal.sanger.ac.uk > /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m shell -a "echo search internal.sanger.ac.uk > /etc/resolvconf/resolv.conf.d/base && resolvconf -u"
 ```
 
 ## kubectl
