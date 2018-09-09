@@ -115,6 +115,23 @@ Kubespray uses [GlusterFS](https://docs.gluster.org/en/latest/) to create a shar
 
 We have pre-configured our development and production clusters, they are located in the `inventory` folders. You can either reuse our settings or create your own folder in the `invetory` folder with your own cluster settings by following [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#inventory-files).
 
+
+### CIDR subnet
+
+When deploying multiple clusters for each new cluster change `cidr` variable in `../../contrib/terraform/openstack/modules/network/main.tf` to one which wasn't used before, e.g. `10.0.1.0/24` or `10.0.2.0/24`:
+
+```
+resource "openstack_networking_subnet_v2" "k8s" {
+  name            = "${var.cluster_name}-internal-network"
+  network_id      = "${openstack_networking_network_v2.k8s.id}"
+  cidr            = "10.0.0.0/24"
+  ip_version      = 4
+  dns_nameservers = "${var.dns_nameservers}"
+}
+```
+
+(to check what IP addresses will be used for different subnets you can use a [subnet calculator](https://mxtoolbox.com/subnetcalculator.aspx))
+
 ### Run Terraform
 
 The next step is to create the cloud infrastructure for kubernetes using Terraform. Please follow [these instructions](https://github.com/kubernetes-incubator/kubespray/tree/master/contrib/terraform/openstack#initialization) to do the terraforming step.
@@ -196,7 +213,7 @@ Host master
 apiVersion: v1
 clusters:
 - cluster:
-    certificate-authority: /Users/vk6/production/ca.pem
+    certificate-authority: /Users/vk6/$CLUSTER/ca.pem
     server: https://127.0.0.1:16443
   name: default-cluster
 contexts:
@@ -210,8 +227,8 @@ preferences: {}
 users:
 - name: default-admin
   user:
-    client-certificate: /Users/vk6/production/admin.pem
-    client-key: /Users/vk6/production/admin-key.pem
+    client-certificate: /Users/vk6/$CLUSTER/admin.pem
+    client-key: /Users/vk6/$CLUSTER/admin-key.pem
 ```
 
 * Create an ssh port forwarding (you will need to rerun it from time to time to keep the connection alive):
@@ -233,13 +250,13 @@ lsof -ti:16443 | xargs kill -9
 
 In this step we will mount GlusterFS to all of the cluster working nodes. We will use Ansible for that and run it only for the working nodes group of hosts. To find all Ansible hosts:
 ```
-inventory/production/hosts --hostfile
+inventory/$CLUSTER/hosts --hostfile
 ```
 
 To find to which ansible group the host belongs to (search for `kubespray_groups` section):
 ```
-inventory/production/hosts --host production-k8s-master-nf-3
-inventory/production/hosts --host production-k8s-node-nf-2
+inventory/$CLUSTER/hosts --host $CLUSTER-k8s-master-nf-3
+inventory/$CLUSTER/hosts --host $CLUSTER-k8s-node-nf-2
 ```
 
 The script above provides us with a list of ansible groups:
@@ -255,17 +272,17 @@ In our case we would like to mount GlusterFS volume to the `kube-node` group.
 
 ```
 # Create directories using module `file`:
-ansible kube-node -b -i inventory/production/hosts -m file -a "path=/mnt/gluster state=directory"
-ansible kube-node -b -i inventory/production/hosts -m file -a "path=/etc/glusterfs state=directory"
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m file -a "path=/mnt/gluster state=directory"
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m file -a "path=/etc/glusterfs state=directory"
 
 # Copy gluster-config using module `copy`:
-ansible kube-node -b -i inventory/production/hosts -m copy -a "src=sanger/glusterfs-config dest=/etc/glusterfs/"
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m copy -a "src=sanger/glusterfs-config dest=/etc/glusterfs/"
 
 # Add glusterfs line to `/etc/fstab`:
-ansible kube-node -b -i inventory/production/hosts -m lineinfile -a 'dest=/etc/fstab line="/etc/glusterfs/glusterfs-config /mnt/gluster glusterfs rw 0 0"'
+ansible kube-node -b -i inventory/$CLUSTER/hosts -m lineinfile -a 'dest=/etc/fstab line="/etc/glusterfs/glusterfs-config /mnt/gluster glusterfs rw 0 0"'
 
 # Finally, mount glusterfs:
-ansible kube-node -b -i inventory/production/hosts -a "mount -a"
+ansible kube-node -b -i inventory/$CLUSTER/hosts -a "mount -a"
 
 # This is needed for iRods to work
 # `-m shell` is used to escape redirection in the script
