@@ -315,7 +315,7 @@ After that you can start using our iRods image (`quay.io/cellgeni/irods`) withou
 To be able to run Nextflow on Kubernetes we need to create a persistent volume claim (we provide a template in this repo):
 
 ```
-kubectl create -f sanger/NF-pvc.yml
+kubectl create -f sanger/storage/NF-pvc.yml
 ```
 
 ## JupyterHub
