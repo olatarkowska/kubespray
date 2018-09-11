@@ -22,3 +22,9 @@ spec:
         - backend:
             serviceName: proxy-public
             servicePort: 80
+  - host: galaxy.cellgeni.sanger.ac.uk
+    http:
+        paths:
+        - backend:
+            serviceName: glx-galaxy-stable
+            servicePort: 80
