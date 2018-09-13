@@ -378,3 +378,40 @@ kubectl delete namespace jpt
 ### Jupyter notebook on a single instance
 
 If you want to install Jupyter on a single instance please follow [these instructions](sanger/jupyter/single-instance.md)
+
+
+## User space
+
+### Prerequisites:
+kubectl >= 1.11
+
+### Setting up an account
+
+1. Send a request for an account through the ticketing system.
+2. Cellgeni team sends you three files: `ca.pem`, `user.crt`, `user.key`
+Create a directory `$HOME/.kube/cellgeni` and place the files in this directory.
+3. Run the following commands:
+```
+kubectl config set-cluster cellgeni \
+  --embed-certs=true \
+  --server=https://172.27.17.106:6443 \
+  --certificate-authority=$HOME/.kube/cellgeni/ca.pem
+kubectl config set-credentials user   --client-certificate=$HOME/.kube/cellgeni/user.crt  --client-key=$HOME/.kube/cellgeni/user.key
+kubectl config set-context cellgeni --cluster=cellgeni --namespace=users --user=user
+kubectl config use-context cellgeni
+```
+4. You can test access to the cluster with
+```
+kubectl --insecure-skip-tls-verify get pods
+```
+
+For now, you will need to enter `--insecure-skip-tls-verify` for every interaction with the cluster, until it is fixed you might want to create an alias. Add this to your `~/.bashrc` (Linux) or `~/.bash_profile` (Mac OS)
+```
+alias kubectl="kubectl --insecure-skip-tls-verify"
+```
+and then `source ~/.bash_profile`.
+
+You can go back to your previous contexts with 
+```
+kubectl config use-context <context-name>
+```
