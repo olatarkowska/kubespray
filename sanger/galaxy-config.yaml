@@ -1,10 +1,10 @@
 # Settings for the init image
 init:
   image:
-    repository: pcm32/galaxy-sc-tertiary-init
-    tag: v18.05
+    repository: quay.io/ebigxa/galaxy-sc-tertiary
+    tag: develop
     pullPolicy: Always
-  force_copy: "__venv__,__config__,__galaxy-central__,__tools__"
+  force_copy: "__venv__,__config__,__galaxy-central__,__tools__,__welcome__"
 
 image:
   repository: pcm32/galaxy-web-k8s
@@ -22,8 +22,7 @@ galaxy_conf:
   admin_users: cellgeni-su@sanger.ac.uk
   allow_user_creation: true
   allow_user_deletion: true
-  filter-with: /galaxy
-  cleanup_job: never
+  cleanup_job: onSuccess
 
 
 job_conf:
@@ -40,7 +39,6 @@ service:
 
 ingress:
   enabled: true
-  path: /galaxy
 
 
 postgresql:
