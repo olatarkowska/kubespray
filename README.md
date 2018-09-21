@@ -356,6 +356,7 @@ helm repo update
 
 To start a JupyterHub pod in the `jpt` name space for the first time run:
 ```
+kubectl create -f sanger/storage/sc-rw-once.yaml
 helm upgrade --install jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0-beta.2 --values jupyter-config.yaml
 ```
 
