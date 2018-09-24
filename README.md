@@ -380,6 +380,22 @@ kubectl delete namespace jpt
 
 If you want to install Jupyter on a single instance please follow [these instructions](sanger/jupyter/single-instance.md)
 
+## Kubernetes dashboard
+
+## Installing
+
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+kubectl apply -f sanger/users/dashboard-admin.yaml  # if only admins use the dashboard, otherwise create another rolebindings
+```
+
+## Running
+
+Run 
+```
+kubectl proxy
+```
+and open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/ in a web browser. Press "skip" on the login page.
 
 ## User space
 
