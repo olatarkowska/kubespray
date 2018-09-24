@@ -380,16 +380,25 @@ kubectl delete namespace jpt
 
 If you want to install Jupyter on a single instance please follow [these instructions](sanger/jupyter/single-instance.md)
 
+## Galaxy
+
+```
+# installing
+helm install -n glx -f sanger/galaxy-config.yaml galaxy-helm-repo/galaxy-stable
+# upgrading
+helm upgrade -n glx -f sanger/galaxy-config.yaml galaxy-helm-repo/galaxy-stable
+```
+
 ## Kubernetes dashboard
 
-## Installing
+### Installing
 
 ```
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 kubectl apply -f sanger/users/dashboard-admin.yaml  # if only admins use the dashboard, otherwise create another rolebindings
 ```
 
-## Running
+### Running
 
 Run 
 ```

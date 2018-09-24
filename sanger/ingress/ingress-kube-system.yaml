@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: systemwide
+  namespace: kube-system
+spec:
+  rules:
+    - host: grafana.cellgeni.sanger.ac.uk
+      http:
+          paths:
+          - backend:
+              serviceName: monitoring-grafana
+              servicePort: 80
+    - host: dashboard.cellgeni.sanger.ac.uk
+      http:
+          paths:
+          - backend:
+              serviceName: kubernetes-dashboard
+              servicePort: 443

@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: cellgeni
 spec:
+  tls:
+    - secretName: tlssecret
   rules:
   - host: partslab.cellgeni.sanger.ac.uk
     http: 
@@ -22,9 +24,16 @@ spec:
         - backend:
             serviceName: proxy-public
             servicePort: 80
+  - host: jupyter-ingress.cellgeni.sanger.ac.uk
+    http:
+        paths:
+        - backend:
+            serviceName: proxy-public
+            servicePort: 80
   - host: galaxy.cellgeni.sanger.ac.uk
     http:
         paths:
         - backend:
             serviceName: glx-galaxy-stable
             servicePort: 80
+    
