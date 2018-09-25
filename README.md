@@ -356,6 +356,7 @@ helm repo update
 
 To start a JupyterHub pod in the `jpt` name space for the first time run:
 ```
+kubectl create -f sanger/storage/sc-rw-once.yaml
 helm upgrade --install jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0-beta.2 --values jupyter-config.yaml
 ```
 
@@ -379,6 +380,31 @@ kubectl delete namespace jpt
 
 If you want to install Jupyter on a single instance please follow [these instructions](sanger/jupyter/single-instance.md)
 
+## Galaxy
+
+```
+# installing
+helm install -n glx -f sanger/galaxy-config.yaml galaxy-helm-repo/galaxy-stable
+# upgrading
+helm upgrade -n glx -f sanger/galaxy-config.yaml galaxy-helm-repo/galaxy-stable
+```
+
+## Kubernetes dashboard
+
+### Installing
+
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+kubectl apply -f sanger/users/dashboard-admin.yaml  # if only admins use the dashboard, otherwise create another rolebindings
+```
+
+### Running
+
+Run 
+```
+kubectl proxy
+```
+and open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/ in a web browser. Press "skip" on the login page.
 
 ## User space
 
