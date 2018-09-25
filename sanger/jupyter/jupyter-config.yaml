@@ -22,8 +22,8 @@ ingress:
 singleuser:
   defaultUrl: "/lab"
   memory:
-    limit: 16G
-    guarantee: 8G
+    limit: 20G
+    guarantee: 16G
   cpu:
     limit: 4
     guarantee: 2
