@@ -142,9 +142,9 @@ Note that Theo created [a pull request](https://github.com/kubernetes-incubator/
 
 ### Network pre-settings
 
-Before running Ansible, make sure to update the `openstack_lbaas_subnet_id` variable in `inventory/CLUSTER/group_vars/all.yml` the with the `network_id` parameter created by terraform:
+Before running Ansible, make sure to update the `openstack_lbaas_subnet_id` variable in `inventory/CLUSTER/group_vars/all.yml` the with the `subnet_id` parameter created by terraform:
 ```
-terraform show terraform.tfstate | grep ' network_id'
+terraform show terraform.tfstate | grep ' subnet_id'
 ```
 
 Also, when you get to the `configuring OpenStack Neutron ports` for __calico networking__ section please follow [Theo's instructions](https://github.com/theobarberbany/Kubernetes_on_Openstack/tree/master/kubespray) on that and run the following one line (thanks to David Jackson!) substituting the `CLUSTER` with your own cluster names defined in the terraform configuration file:
