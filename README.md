@@ -297,7 +297,7 @@ lsof -ti:16443 | xargs kill -9
 
 ## iRods
 
-We also need to create a cluster secret which can be used by iRods. In the [irods-secret.yml](sanger/irods-secret.yml) substitute the `IPW` and `IUN` with your username and password in base64 encoding. To encode please use:
+We also need to create a cluster secret which can be used by iRods. In the `sanger/irods-secret.yml` substitute the `IPW` and `IUN` with your username and password in base64 encoding. To encode please use:
 
 ```
 echo -n IRODS_USER_NAME | base64
@@ -305,17 +305,55 @@ echo -n IRODS_USER_NAME | base64
 
 To create a secret:
 ```
-kubectl create -f sanger/irods-secret.yml
+kubectl create -f irods-secret.yml
 ```
 
 After that you can start using our iRods image (`quay.io/cellgeni/irods`) without needing to provide your credentials.
 
 ## Nextflow
 
-To be able to run Nextflow on Kubernetes we need to create a persistent volume claim (we provide a template in this repo):
+To be able to run Nextflow on Kubernetes we need to create a persistent volume claim (PVC) with `ReadWriteMany` access mode. The default OpenStack storage class (`cinder`) does not have this access mode. However, the GlusterFS storage (which we mounted to all of the nodes above) has it. Since GlusterFS is mounted to all of the cluster nodes we can create a `hostpath` storage class for it. First, create the `glusterfs-sc.yaml` file with the following content:
 
 ```
-kubectl create -f sanger/storage/NF-pvc.yml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: glusterfs
+provisioner: torchbox.com/hostpath
+parameters:
+  pvDir: /mnt/gluster
+```
+
+Now create the storage class:
+```
+kubectl create -f glusterfs-storage-class.yaml
+```
+
+`torchbox.com/hostpath` is not part of Kubernetes, therefore we need to deploy it first. Please use the `sanger/storage/glusterfs/deployment.yaml` file to do that:
+
+```
+kubectl create -f deployment.yaml
+```
+
+Now we can create a PVC for Nextflow using the `sanger/storage/nf-pvc.yaml`:
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nf-pvc
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 3000Gi
+  storageClassName: "glusterfs"
+```
+
+Let's create the PVC:
+```
+kubectl create -f nf-pvc.yml
 ```
 
 ## JupyterHub
