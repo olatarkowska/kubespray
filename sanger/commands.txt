@@ -1,0 +1,9 @@
+# on Mac - encode file to base64 and copy to one liner
+
+openssl base64 < path/to/file.png | tr -d '\n' | pbcopy
+
+
+# update Galaxy
+
+helm install -n glx -f galaxy-config.yaml galaxy-helm-repo/galaxy-stable
+helm upgrade -n glx -f galaxy-config.yaml galaxy-helm-repo/galaxy-stable

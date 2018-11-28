@@ -1,0 +1,1 @@
+for c in $(kubectl get pods); do if [[ $c == nf* ]]; then kubectl delete pods $c; fi; done;
