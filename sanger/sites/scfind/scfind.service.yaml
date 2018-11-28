@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: scfind-np
+  labels:
+    app: scfind
+spec:
+  type: NodePort
+  ports:
+  - port: 9000
+    targetPort: scfind
+  selector:
+    app: scfind

@@ -375,7 +375,10 @@ mv darwin-amd64/helm /usr/local/bin/helm
 
 If helm is not installed on the cluster you can do 
 ```
-helm init
+kubectl --namespace kube-system create serviceaccount tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 ``` 
 on your local machine and this will install the same version of helm on the cluster. If someone has already installed helm on the cluster, then run 
 ```
@@ -391,11 +394,17 @@ helm repo update
 ```
 
 ### Start/upgrade JupyterHub on Kubernetes
-
+ 
 To start a JupyterHub pod in the `jpt` name space for the first time run:
+
+(download [jupyter-github-config.yaml](https://gitlab.internal.sanger.ac.uk/cellgeni/kubespray/blob/master/sanger/sites/jupyter-github-auth.yaml) for the Cellgeni specific setup and put it instead of `jupyter-config.yaml`)
 ```
 kubectl create -f sanger/storage/sc-rw-once.yaml
-helm upgrade --install jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0-beta.2 --values jupyter-config.yaml
+helm upgrade --install jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0 --values jupyter-config.yaml
+```
+Jupyter large
+```
+helm upgrade --install jptl jupyterhub/jupyterhub --namespace jptl --version 0.7.0 --values jupyter-large-config.yaml
 ```
 
 Here the [jupyter-config.yaml](sanger/jupyter/jupyter-config.yaml) is used in which all of the Jupyter parameters are spefified.
@@ -416,7 +425,7 @@ kubectl delete namespace jpt
 
 ### Jupyter notebook on a single instance
 
-If you want to install Jupyter on a single instance please follow [these instructions](sanger/jupyter/single-instance.md)
+If you want to install Jupyter on a single instance please follow [these instructions](docs/single-instance.md)
 
 ## Galaxy
 

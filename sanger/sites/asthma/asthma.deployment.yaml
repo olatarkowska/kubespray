@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asthma
+spec:
+  selector:
+    matchLabels:
+      app: asthma
+  replicas: 1
+  template:
+    metadata:
+      name: asthma
+      labels:
+        app: asthma
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: asthma-pvc
+      containers:
+      - image: quay.io/cellgeni/asthma:v0.1.0
+        imagePullPolicy: IfNotPresent
+        name: asthma
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        env:
+        - name: DATASET
+          value: "/data/dataset.RDS"
+        ports:
+        - containerPort: 3838
+          name: asthma
+        resources:
+          limits:
+            memory: "16Gi"
+            cpu: 8

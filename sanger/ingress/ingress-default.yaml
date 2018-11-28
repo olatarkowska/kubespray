@@ -2,16 +2,38 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: cellgeni
+  annotations:
+    contour.heptio.com/request-timeout: "2000s"
 spec:
-  tls:
-    - secretName: tlssecret
   rules:
   - host: partslab.cellgeni.sanger.ac.uk
+    http: &jacks
+      paths:
+      - path: /JACKS
+        backend:
+          serviceName: jacks
+          servicePort: 8005
+      - path: /
+        backend:
+          serviceName: mprofile-web
+          servicePort: 8000
+  - host: partslab-proxy.cellgeni.sanger.ac.uk
+    http: *jacks
+  - host: partslab.sanger.ac.uk
+    http: *jacks
+
+  - host: forecast-partslab.cellgeni.sanger.ac.uk
     http: 
       paths:
       - backend:
           serviceName: mprofile-web
           servicePort: 8000
+  - host: jacks-partslab.cellgeni.sanger.ac.uk
+    http: 
+      paths:
+      - backend:
+          serviceName: jacks
+          servicePort: 8005
   - host: sample-tracker.cellgeni.sanger.ac.uk
     http:
         paths:
@@ -36,4 +58,15 @@ spec:
         - backend:
             serviceName: glx-galaxy-stable
             servicePort: 80
-    
+  - host: scfind-ingress.cellgeni.sanger.ac.uk
+    http:
+        paths:
+        - backend:
+            serviceName: scfind-np
+            servicePort: 9000
+  - host: asthma-ingress.cellgeni.sanger.ac.uk
+    http:
+        paths:
+        - backend:
+            serviceName: asthma
+            servicePort: 9001

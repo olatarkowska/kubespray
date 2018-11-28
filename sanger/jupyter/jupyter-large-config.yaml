@@ -13,31 +13,23 @@ auth:
     dn:
       templates:
         - 'uid={username},ou=people,dc=sanger,dc=ac,dc=uk'
-    # allowedGroups:
-    #   - 'cn=team278,ou=group,dc=sanger,dc=ac,dc=uk'
-    #   - 'cn=teamtrynka,ou=group,dc=sanger,dc=ac,dc=uk'
-    #   - 'cn=team218,ou=group,dc=sanger,dc=ac,dc=uk'
-    #   - 'cn=team170,ou=group,dc=sanger,dc=ac,dc=uk'
-    #   - 'cn=team205,ou=group,dc=sanger,dc=ac,dc=uk'
-    #   - 'cn=team204,ou=group,dc=sanger,dc=ac,dc=uk'
 ingress:
     enabled: true
     hosts:
-     - jupyter.cellgeni.sanger.ac.uk
-     - jupyter.cellgeni.internal.sanger.ac.uk
-     - jupyter-ingress.cellgeni.internal.sanger.ac.uk
+     - jupyter-large.cellgeni.sanger.ac.uk
 cull:
   timeout: 129600
+  
 singleuser:
   defaultUrl: "/lab"
   storage:
-    capacity: 30Gi
+    capacity: 120Gi
   memory:
-    limit: 20G
-    guarantee: 16G
+    limit: 200G
+    guarantee: 200G
   cpu:
-    limit: 4
-    guarantee: 2
+    limit: 12
+    guarantee: 8
   image:
     name: quay.io/cellgeni/cellgeni-jupyter
     tag: v0.2.8
