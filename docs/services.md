@@ -20,7 +20,11 @@ After that you can start using our iRods image (`quay.io/cellgeni/irods`) withou
 
 ## Nextflow
 
-To be able to run Nextflow on Kubernetes we need to create a persistent volume claim (PVC) with `ReadWriteMany` access mode. The default OpenStack storage class (`cinder`) does not have this access mode. However, the GlusterFS storage (which we mounted to all of the nodes above) has it. Since GlusterFS is mounted to all of the cluster nodes we can create a `hostpath` storage class for it. First, create the `glusterfs-sc.yaml` file with the following content:
+To be able to run Nextflow on Kubernetes we need to create a persistent volume claim (PVC) with `ReadWriteMany` access mode. The default OpenStack storage class (`cinder`) does not have this access mode. However, the GlusterFS storage (which we mounted to all of the nodes above) has it. 
+
+### StorageClass
+
+Since GlusterFS is mounted to all of the cluster nodes we can create a `hostpath` storage class for it. First, create the `glusterfs-sc.yaml` file with the following content:
 
 ```
 apiVersion: storage.k8s.io/v1
@@ -37,11 +41,15 @@ Now create the storage class:
 kubectl create -f glusterfs-storage-class.yaml
 ```
 
+### hostpath provisioner
+
 `torchbox.com/hostpath` is not part of Kubernetes, therefore we need to deploy it first. Please use the `sanger/storage/glusterfs/deployment.yaml` file to do that:
 
 ```
 kubectl create -f deployment.yaml
 ```
+
+### PersistentVolumeClaim
 
 Now we can create a PVC for Nextflow using the `sanger/storage/nf-pvc.yaml`:
 
@@ -64,6 +72,62 @@ Let's create the PVC:
 kubectl create -f nf-pvc.yml
 ```
 
+This will create a PVC folder in the mounted volume, e.g. `/mnt/gluster/pvc-0999129d-f188-11e8-adab-fa163e9c40bf`
+
+### How to run Nextflow
+
+If you run NF on K8s cluster from your computer nextflow will be using your local user name. For that to work you will need to create a user name folder (e.g. `user1`) in the PVC folder (e.g.
+`/mnt/gluster/pvc-0999129d-f188-11e8-adab-fa163e9c40bf`). This requires sudo if you are user ubuntu.
+
+Then create the `nf.config` file with the following content:
+```
+k8s {
+  debug.yaml = true
+}
+```
+
+then in the same folder run:
+```
+nextflow kuberun login -c nf.config -v nf-pvc
+```
+
+Nextflow will create its pod and a yaml file (`.nextflow.pod.yaml`), e.g.:
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tiny-turing
+  namespace: default
+  labels: {app: nextflow, runName: tiny-turing}
+spec:
+  restartPolicy: Never
+  containers:
+  - name: tiny-turing
+    image: nextflow/nextflow:0.31.1
+    command: [/bin/bash, -c, source /etc/nextflow/init.sh; tail -f /dev/null]
+    workingDir: /workspace/vk6
+    env:
+    - {name: NXF_WORK, value: /workspace/vk6/work}
+    - {name: NXF_ASSETS, value: /workspace/projects}
+    - {name: NXF_EXECUTOR, value: k8s}
+    volumeMounts:
+    - {name: vol-1, mountPath: /workspace}
+    - {name: vol-2, mountPath: /etc/nextflow}
+  volumes:
+  - name: vol-1
+    persistentVolumeClaim: {claimName: nf-pvc}
+  - name: vol-2
+    configMap: {name: nf-config-74272ba3}
+```
+
+Now you can reuse this file to manually create a NF pod with your own name and your own docker image. We have our NF docker image with the latest NF version and some additional software here: `quay.io/cellgeni/nf-login:18.10.1` (`18.10.1` is the latest version at the moment of writing)
+
+To start a NF pod manually from the edited `.nextflow.pod.yaml` file, please run:
+
+```
+kubectl create -f .nextflow.pod.yaml
+```
 
 ## JupyterHub
 
