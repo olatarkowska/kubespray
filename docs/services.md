@@ -81,7 +81,7 @@ To allow Nextflow create pods in the `default` namespace you will need to run th
 kubectl create clusterrolebinding nextflow --clusterrole=edit --serviceaccount=default:default -n default
 ```
 
-More details can be found in this [issue].(https://stackoverflow.com/questions/47973570/kubernetes-log-user-systemserviceaccountdefaultdefault-cannot-get-services)
+More details can be found in this [issue](https://stackoverflow.com/questions/47973570/kubernetes-log-user-systemserviceaccountdefaultdefault-cannot-get-services).
 
 __(TODO: in the future we would like to create a separate `nextflow` namespace specifically for Nextflow and give it permissions only in that namespace)__
 
