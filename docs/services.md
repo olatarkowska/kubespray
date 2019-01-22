@@ -192,9 +192,9 @@ Jupyter large
 helm upgrade --install jptl jupyterhub/jupyterhub --namespace jptl --version 0.7.0 --values jupyter-large-config.yaml
 ```
 
-Here the [jupyter-config.yaml](sanger/jupyter/jupyter-config.yaml) is used in which all of the Jupyter parameters are spefified.
+Here the [jupyter-config.yaml](../sanger/jupyter/jupyter-config.yaml) is used where all of the Jupyter parameters are specified.
 
-If you update some parameters in the [jupyter-config.yaml](sanger/jupyter/jupyter-config.yaml), you will need to upgrade your JupyterHub deployment:
+If you update any parameters in the [jupyter-config.yaml](../sanger/jupyter/jupyter-config.yaml), you will need to upgrade your JupyterHub deployment:
 ```
 helm upgrade jpt jupyterhub/jupyterhub --namespace jpt --version 0.7.0-beta.2 --values jupyter-config.yaml
 ```
