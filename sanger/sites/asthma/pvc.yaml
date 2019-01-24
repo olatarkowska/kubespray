@@ -4,8 +4,8 @@ metadata:
   name: asthma-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
   resources:
     requests:
       storage: 3Gi
-  storageClassName: "gold"
+  storageClassName: "glusterfs"

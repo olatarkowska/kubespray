@@ -1,6 +1,7 @@
 # specific
 web/
 sanger/jupyter/jupyter-github-auth.yaml
+sanger/jupyter/jupyter-large-config.yaml
 
 
 .vagrant

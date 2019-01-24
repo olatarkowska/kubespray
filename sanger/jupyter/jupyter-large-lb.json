@@ -1,0 +1,38 @@
+{
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
+        "creationTimestamp": null,
+        "labels": {
+            "app": "jupyterhub",
+            "chart": "jupyterhub-0.7.0",
+            "component": "proxy-public",
+            "heritage": "Tiller",
+            "release": "jptl"
+        },
+        "name": "proxy-public",
+        "namespace": "jptl",
+        "selfLink": "/api/v1/namespaces/jpt/services/proxy-public"
+    },
+    "spec": {
+        "externalTrafficPolicy": "Cluster",
+        "ports": [
+            {
+                "name": "http",
+                "nodePort": 32282,
+                "port": 8003,
+                "protocol": "TCP",
+                "targetPort": 8000
+            }
+        ],
+        "selector": {
+            "component": "proxy",
+            "release": "jptl"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+    },
+    "status": {
+        "loadBalancer": {}
+    }
+}

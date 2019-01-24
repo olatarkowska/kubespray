@@ -1,38 +1,79 @@
 proxy:
     secretToken: c65b057a6ba96ee5562f4ea7d78f949d353908f52601c50c29223dd30166ccf1
+    service:
+      type: NodePort
 auth:
   admin:
     users:
+      - wikiselev
       - ak27
       - vk6
-      - svd
-  type: ldap
-  ldap:
-    server:
-      address: ldap-ro.internal.sanger.ac.uk
-    dn:
-      templates:
-        - 'uid={username},ou=people,dc=sanger,dc=ac,dc=uk'
-ingress:
-    enabled: true
-    hosts:
-     - jupyter-large.cellgeni.sanger.ac.uk
+      - anton-khodak
+  whitelist:
+    users:
+      - anton-khodak
+      - ak27
+      - vk6
+      - ecg
+      - em17
+      - ct5 
+      - wikiselev
+      - rubenchazarra
+      - mariaprimo
+      - nh3
+      - grefonya
+      - elo073
+      - mhemberg
+      - liuyongdk
+      - xjshen
+      - CristianRiccio
+      - lfhandfield
+      - jeremy37
+      - MonaLitvinukova
+      - GKild
+      - FiCalvert
+      - mhaneklaus
+      - eddiecg
+      - Clara22
+      - vkedlian
+      - AlexanderAivazidis
+      - vasipupkin
+      - rrostom
+      - ktpolanski
+  # type: ldap
+  # ldap:
+  #   server:
+  #     address: ldap-ro.internal.sanger.ac.uk
+  #   dn:
+  #     templates:
+  #       - 'uid={username},ou=people,dc=sanger,dc=ac,dc=uk'
+  type: github
+  github:
+    clientId: "f9b48dfe432a6dcc4233"
+    clientSecret: "dcdeda17e13b2869cd2f410d6502e1c66e5a4386"
+    callbackUrl: "https://jupyter-large.cellgeni.sanger.ac.uk/hub/oauth_callback"
+
+# ingress:
+#     enabled: true
+#     hosts:
+#      - jupyter-large.cellgeni.sanger.ac.uk
+#      - jupyter-large-backend.cellgeni.sanger.ac.uk
 cull:
-  timeout: 129600
+  timeout: 129601
   
 singleuser:
   defaultUrl: "/lab"
   storage:
-    capacity: 120Gi
+    capacity: 100Gi
   memory:
-    limit: 200G
-    guarantee: 200G
+    limit: 100G
+    guarantee: 100G
   cpu:
-    limit: 12
+    limit: 16
     guarantee: 8
   image:
     name: quay.io/cellgeni/cellgeni-jupyter
-    tag: v0.2.8
+    tag: v0.3.7.1
   lifecycleHooks:
     postStart:
       exec:

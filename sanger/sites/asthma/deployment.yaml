@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: asthma
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       name: asthma
@@ -18,7 +18,7 @@ spec:
           persistentVolumeClaim:
             claimName: asthma-pvc
       containers:
-      - image: quay.io/cellgeni/asthma:v0.1.0
+      - image: quay.io/cellgeni/asthma:v0.1.2
         imagePullPolicy: IfNotPresent
         name: asthma
         volumeMounts:
@@ -29,8 +29,26 @@ spec:
           value: "/data/dataset.RDS"
         ports:
         - containerPort: 3838
+          hostPort: 3838
           name: asthma
         resources:
+          requests:
+            memory: "8Gi"
+            cpu: 1
           limits:
             memory: "16Gi"
             cpu: 8
+        livenessProbe:
+          httpGet: 
+            path: /
+            port: asthma
+          initialDelaySeconds: 10
+          timeoutSeconds: 20
+          periodSeconds: 240
+      initContainers:
+      - name: pull-data
+        image: perl
+        command: ['wget', 'https://cellgeni.cog.sanger.ac.uk/asthma/dataset.RDS', '-N', '-O', '/data/dataset.RDS']
+        volumeMounts:
+        - name: data
+          mountPath: /data 
