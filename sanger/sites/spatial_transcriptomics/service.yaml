@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: transcriptomics
+  labels:
+    app: transcriptomics
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: transcriptomics
+  selector:
+    app: transcriptomics

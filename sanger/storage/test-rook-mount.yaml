@@ -1,0 +1,34 @@
+# NOT READY
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-rook
+spec:
+  selector:
+    matchLabels:
+      app: test-rook
+  replicas: 1
+  template:
+    metadata:
+      name: test-rook
+      labels:
+        app: test-rook
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nf-pvc
+      containers:
+      - image: frolvlad/alpine-bash
+        imagePullPolicy: IfNotPresent
+        name: test-rook
+        env:
+        - name: FLEXVOLUME_DIR_PATH
+          value: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        ports:
+        - containerPort: 3838
+          hostPort: 3838
+          name: test-rook

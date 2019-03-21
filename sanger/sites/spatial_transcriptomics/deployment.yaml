@@ -1,37 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scfind
+  name: transcriptomics
 spec:
   selector:
     matchLabels:
-      app: scfind
+      app: transcriptomics
   replicas: 1
   template:
     metadata:
-      name: scfind
+      name: transcriptomics
       labels:
-        app: scfind
+        app: transcriptomics
     spec:
       containers:
-      - image: quay.io/hemberg-group/scfind-shiny:v1.5.0
+      - image: quay.io/cellgeni/spatial_transcriptomics_research:0.1.0
         imagePullPolicy: IfNotPresent
-        name: scfind
+        name: transcriptomics
         ports:
-        - containerPort: 3838
-          hostPort: 9898
-          name: scfind
+        - containerPort: 8080
+          hostPort: 9868
+          name: transcriptomics
         resources:
           requests:
-            memory: "20Gi"
-            cpu: 4
+            memory: "1Gi"
+            cpu: 1
           limits:
-            memory: "40Gi"
-            cpu: 6
+            memory: "20Gi"
+            cpu: 3
         livenessProbe:
           httpGet: 
             path: /
-            port: scfind
+            port: transcriptomics
           initialDelaySeconds: 10
           timeoutSeconds: 20
           periodSeconds: 240

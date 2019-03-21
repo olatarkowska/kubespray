@@ -29,6 +29,34 @@ spec:
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
 metadata:
+  name: transcriptomics
+spec:
+  virtualhost:
+    fqdn: spatial-transcriptomics-research.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: transcriptomics
+          port: 8080
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: transcriptomics-backend
+spec:
+  virtualhost:
+    fqdn: spatial-transcriptomics-research-backend.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: transcriptomics
+          port: 8080
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
   name: asthma-backend
 spec:
   virtualhost:
@@ -74,7 +102,7 @@ metadata:
   name: scfind
 spec:
   virtualhost:
-    fqdn: scfind.cellgeni.sanger.ac.uk
+    fqdn: scfind.sanger.ac.uk
   routes:
     - match: /
       enableWebsockets: true
@@ -95,4 +123,49 @@ spec:
       enableWebsockets: true
       services:
         - name: proxy-public
+          port: 80
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  virtualhost:
+    fqdn: prometheus.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: prometheus-server
+          port: 80
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  virtualhost:
+    fqdn: grafana.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: grafana
+          port: 80
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: grafana-backend
+  namespace: monitoring
+spec:
+  virtualhost:
+    fqdn: grafana-backend.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: grafana
           port: 80
