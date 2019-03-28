@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+
+# MAKE SURE YOU ARE ON THE RIGHT K8S CLUSTER CONTEXT
 # # create temp dir
-# mktemp -d 
+# cd `mktemp -d`
 
 # install helm
 
@@ -12,10 +14,12 @@ install_helm(){
     helm init --service-account tiller --wait
     kubectl patch deployment tiller-deploy --namespace=kube-system --type=json --patch='[{"op": "add", "path": "/spec/template/spec/containers/0/command", "value": ["/tiller", "--listen=localhost:44134"]}]'
 }
+helm version
 RESULT=$?
 case $RESULT in
     0) echo Helm is already installed;
-    127) install_helm();
+    127) install_helm(); # if there is no `helm` command on the machine // `helm init --client-only` is an option as well
+    130) install_helm(); # if the command is interrupted since server doesn't report tiller's version
 else
   echo Helm exited with code $RESULT && exit 1;
 fi

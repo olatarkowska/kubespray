@@ -169,3 +169,31 @@ spec:
       services:
         - name: grafana
           port: 80
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: nf-server
+spec:
+  virtualhost:
+    fqdn: nf-server.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: nf-server
+          port: 9005
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: nf-web
+spec:
+  virtualhost:
+    fqdn: pipelines.cellgeni.sanger.ac.uk
+  routes:
+    - match: /
+      enableWebsockets: true
+      services:
+        - name: nf-web
+          port: 8000
