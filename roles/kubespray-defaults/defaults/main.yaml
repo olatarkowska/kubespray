@@ -269,7 +269,7 @@ openstack_lbaas_enabled: false
 ## To enable automatic floating ip provisioning, specify a subnet.
 # openstack_lbaas_floating_network_id: "Neutron network ID (not subnet ID) to get floating IP from, disabled by default"
 ## Override default LBaaS behavior
-# openstack_lbaas_use_octavia: False
+openstack_lbaas_use_octavia: True
 # openstack_lbaas_method: "ROUND_ROBIN"
 # openstack_lbaas_provider: "haproxy"
 openstack_lbaas_create_monitor: "yes"
