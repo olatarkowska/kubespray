@@ -1,0 +1,33 @@
+kind: ConfigMap
+metadata:
+  name: kube-lustre-config
+  namespace: lustre
+apiVersion: v1
+data:
+  configuration.json: |
+    {
+      "configuration1": {
+        "lustre": {
+          "install": true,
+          "mgsnode": "172.17.149.4@tcp:172.17.149.5@tcp",
+          "fsname": "lustre1",
+          "device": "/lsu06",
+          "debug": false,
+          "force_create": false,
+          "mountpoint": "/lustre/secure"
+        },
+      }
+    }
+  daemons.json: |
+    {
+      "configuration1": {
+         "mdt0-mgs": ["node1", "node2"]
+      }
+    }
+  clients.json: |
+    {
+      "configuration1": [
+         "node1",
+         "node2"
+      ]
+    }
