@@ -38,6 +38,16 @@ resource "openstack_networking_secgroup_rule_v2" "bastion" {
   security_group_id = "${openstack_networking_secgroup_v2.bastion.id}"
 }
 
+resource "openstack_networking_secgroup_rule_v2" "bastion_icmp" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
+  port_range_min    = 0
+  port_range_max    = 0
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = "${openstack_networking_secgroup_v2.bastion.id}"
+}
+
 resource "openstack_networking_secgroup_v2" "k8s" {
   name                 = "${var.cluster_name}-k8s"
   description          = "${var.cluster_name} - Kubernetes"
@@ -109,7 +119,7 @@ resource "openstack_compute_instance_v2" "bastion" {
   }
 
   provisioner "local-exec" {
-    command = "sed s/USER/${var.ssh_user}/ contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${var.bastion_fips[0]}/ > contrib/terraform/group_vars/no-floating.yml"
+    command = "sed s/USER/${var.ssh_user}/ ../../contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${var.bastion_fips[0]}/ > group_vars/no-floating.yml"
   }
 }
 
@@ -136,7 +146,7 @@ resource "openstack_compute_instance_v2" "k8s_master" {
   }
 
   provisioner "local-exec" {
-    command = "sed s/USER/${var.ssh_user}/ contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${element( concat(var.bastion_fips, var.k8s_master_fips), 0)}/ > contrib/terraform/group_vars/no-floating.yml"
+    command = "sed s/USER/${var.ssh_user}/ ../../contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${element( concat(var.bastion_fips, var.k8s_master_fips), 0)}/ > group_vars/no-floating.yml"
   }
 }
 
@@ -163,7 +173,7 @@ resource "openstack_compute_instance_v2" "k8s_master_no_etcd" {
   }
 
   provisioner "local-exec" {
-    command = "sed s/USER/${var.ssh_user}/ contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${element( concat(var.bastion_fips, var.k8s_master_fips), 0)}/ > contrib/terraform/group_vars/no-floating.yml"
+    command = "sed s/USER/${var.ssh_user}/ ../../contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${element( concat(var.bastion_fips, var.k8s_master_fips), 0)}/ > group_vars/no-floating.yml"
   }
 }
 
@@ -257,7 +267,7 @@ resource "openstack_compute_instance_v2" "k8s_node" {
   }
 
   provisioner "local-exec" {
-    command = "sed s/USER/${var.ssh_user}/ contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${element( concat(var.bastion_fips, var.k8s_node_fips), 0)}/ > contrib/terraform/group_vars/no-floating.yml"
+    command = "sed s/USER/${var.ssh_user}/ ../../contrib/terraform/openstack/ansible_bastion_template.txt | sed s/BASTION_ADDRESS/${element( concat(var.bastion_fips, var.k8s_node_fips), 0)}/ > group_vars/no-floating.yml"
   }
 }
 
