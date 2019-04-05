@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcriptomics
+spec:
+  selector:
+    matchLabels:
+      app: transcriptomics
+  replicas: 1
+  template:
+    metadata:
+      name: transcriptomics
+      labels:
+        app: transcriptomics
+    spec:
+      containers:
+      - image: quay.io/cellgeni/spatial_transcriptomics_research:0.1.0
+        imagePullPolicy: IfNotPresent
+        name: transcriptomics
+        ports:
+        - containerPort: 8080
+          hostPort: 9868
+          name: transcriptomics
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: 1
+          limits:
+            memory: "20Gi"
+            cpu: 3
+        livenessProbe:
+          httpGet: 
+            path: /
+            port: transcriptomics
+          initialDelaySeconds: 10
+          timeoutSeconds: 20
+          periodSeconds: 240
