@@ -7,6 +7,11 @@ metadata:
     k8s-app: kube-nginx
 spec:
   hostNetwork: true
+  nodeSelector:
+    beta.kubernetes.io/os: linux
+{% if kube_version is version('v1.11.1', '>=') %}
+  priorityClassName: system-node-critical
+{% endif %}
   containers:
   - name: nginx-proxy
     image: {{ nginx_image_repo }}:{{ nginx_image_tag }}
@@ -20,6 +25,12 @@ spec:
         memory: {{ nginx_memory_requests }}
     securityContext:
       privileged: true
+    {% if nginx_kube_apiserver_healthcheck_port is defined -%}
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: {{ nginx_kube_apiserver_healthcheck_port }}
+    {% endif -%}
     volumeMounts:
     - mountPath: /etc/nginx
       name: etc-nginx
@@ -27,4 +38,4 @@ spec:
   volumes:
   - name: etc-nginx
     hostPath:
-      path: /etc/nginx
+      path: {{ nginx_config_dir }}

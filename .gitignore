@@ -6,10 +6,7 @@ sanger/jupyter/jupyter-large-config.yaml
 
 .vagrant
 *.retry
-inventory/vagrant_ansible_inventory
-inventory/credentials/
-inventory/group_vars/fake_hosts.yml
-inventory/host_vars/
+**/vagrant_ansible_inventory
 temp
 .idea
 .tox
@@ -18,10 +15,16 @@ temp
 *.tfstate
 *.tfstate.backup
 contrib/terraform/aws/credentials.tfvars
-**/*.sw[pon]
 /ssh-bastion.conf
 **/*.sw[pon]
+*~
 vagrant/
+
+# Ansible inventory
+inventory/*
+!inventory/local
+!inventory/sample
+inventory/*/artifacts/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -30,7 +33,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-inventory/*/artifacts/
 env/
 build/
 credentials/
