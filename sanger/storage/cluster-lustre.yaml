@@ -1,4 +1,32 @@
-- hosts: kube-node
-  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
-  roles:
-    - { role: lustre}
+---
+- hosts: "{{ node | default('kube-node') }}"
+  tasks:
+    - name: Network template
+      template:
+        src: 60-lus.j2
+        dest: /etc/network/interfaces.d/60-lus.cfg
+      with_items:
+        - { lusnetwork: 'ens6' }
+
+    - name: network up
+      command: ifup {{ lusnetwork }}
+      ignore_errors: yes
+
+    - name: uncomment lustre mount
+      replace:
+        path: /etc/fstab
+        regexp: '^#(.*)'
+        replace: '\1'
+
+    - name: nextflow requires lock 
+      replace:
+        path: /etc/fstab
+        regexp: 'localflock,noauto'
+        replace: 'flock,noauto'
+
+    - name: reboot
+      reboot:
+
+    - name: mount lustre
+      command: "mount -t lustre -o flock lus06-mds1@tcp0:lus06-mds2@tcp0:/lus06 /lustre/secure"
+      ignore_errors: yes

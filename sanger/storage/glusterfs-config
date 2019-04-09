@@ -1,14 +1,14 @@
 volume remote1
   type protocol/client
   option transport-type tcp
-  option remote-host 10.0.1.27
+  option remote-host REMOTE-HOST-1
   option remote-subvolume /mnt/xfs-drive-gluster/brick
 end-volume
 
 volume remote2
   type protocol/client
   option transport-type tcp
-  option remote-host 10.0.1.24
+  option remote-host REMOTE-HOST-2
   option remote-subvolume /mnt/xfs-drive-gluster/brick
 end-volume
 
@@ -25,6 +25,6 @@ end-volume
 
 volume cache
   type performance/io-cache
-  option cache-size 1024MB
+  option cache-size 512MB
   subvolumes writebehind
 end-volume

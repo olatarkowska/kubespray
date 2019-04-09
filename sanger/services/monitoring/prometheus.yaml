@@ -1,0 +1,46 @@
+server:
+  service:
+    type: NodePort
+  persistentVolume:
+    enabled: true
+    size: 16Gi
+    storageClass: glusterfs
+  retention: 60d
+# coreDns:
+#   enabled: false
+
+# kubeDns:
+#   enabled: true
+
+# alertmanager:
+#   alertmanagerSpec:
+#     storage:
+#       volumeClaimTemplate:
+#         spec:
+#           accessModes: ["ReadWriteOnce"]
+#           resources:
+#             requests:
+#               storage: 10Gi
+
+# prometheus:
+#   prometheusSpec:
+#     storageSpec:
+#       volumeClaimTemplate:
+#         spec: 
+#           accessModes: ["ReadWriteOnce"]
+#           resources:
+#             requests:
+#               storage: 10Gi
+
+# grafana:
+#   adminPassword: "Bainu'z3"
+#   ingress:
+#     enabled: true
+#     annotations:
+#       kubernetes.io/ingress.class: contour
+#     hosts:
+#       - grafana.cellgeni.sanger.ac.uk
+#   persistence:
+#     enabled: true
+#     accessModes: ["ReadWriteOnce"]
+#     size: 10Gi

@@ -1,0 +1,24 @@
+---
+- hosts: "{{ node | default('kube-node') }}"
+  tasks:
+    - name: Create directories
+      file:
+        path: "{{item}}"
+        state: directory
+      with_items:
+        - { path: "/mnt/gluster" }
+        - { path: "/etc/glusterfs" }
+
+    - name: Copy gluster-config 
+      copy:
+        src: "sanger/glusterfs-config"
+        dest: "/etc/glusterfs/"
+
+    - name: Add glusterfs line to /etc/fstab
+      lineinfile:
+        dest: "/etc/fstab"
+        line: "/etc/glusterfs/glusterfs-config /mnt/gluster glusterfs rw 0 0"
+
+    - name: Mount glusterfs
+      command: "mount -a"
+      ignore_errors: yes
